@@ -2,6 +2,28 @@ Language: **English** [简体中文](./cn_README.md) [한국어（outdated）](.
 
 # DDSP-SVC
 
+## (6.0 - Experimental) New rectified-flow based model
+
+(1) Preprocessing：
+
+```bash
+python preprocess.py -c configs/reflow.yaml
+```
+
+(2) Training：
+
+```bash
+python train_reflow.py -c configs/reflow.yaml
+```
+
+(3) Non-real-time inference：
+
+```bash
+python main_reflow.py -i <input.wav> -m <model_ckpt.pt> -o <output.wav> -k <keychange (semitones)> -id <speaker_id> -step <infer_step> -method <method> -ts <t_start>
+```
+'infer_step' is the number of sampling steps for rectified-flow ODE, 'method' is 'euler' or 'rk4', 't_start' is the start time point of ODE, which needs to be larger than or equal to `t_start` in the configuration file, it is recommended to keep it equal (the default is 0.7)
+
+
 ## (5.0 - Update) Improved DDSP cascade diffusion model
 
 Installing dependencies, data preparation, configuring the pre-trained encoder (hubert or contentvec ) , pitch extractor (RMVPE) and vocoder (nsf-hifigan) are the same as training a pure DDSP model (See section below).
@@ -172,9 +194,13 @@ UPDATE: python 3.8 (windows) + cuda 11.8 + torch 2.0.0 + torchaudio 2.0.1 works,
 
 - Vocoder or enhancer:
 
-Download the pre-trained [NSF-HiFiGAN](https://github.com/openvpi/vocoders/releases/download/nsf-hifigan-v1/nsf_hifigan_20221211.zip) vocoder and unzip it into `pretrain/` folder.
+Download and unzip the pre-trained [NSF-HiFiGAN](https://github.com/openvpi/vocoders/releases/download/nsf-hifigan-44.1k-hop512-128bin-2024.02/nsf_hifigan_44.1k_hop512_128bin_2024.02.zip) vocoder 
 
-Or use the https://github.com/openvpi/SingingVocoders project to fine-tune the vocoder for higher sound quality.
+or use the https://github.com/openvpi/SingingVocoders project to fine-tune the vocoder for higher sound quality.
+
+Then rename the checkpoint file and place it at the location specified by the 'vocoder.ckpt' parameter in the configuration file. The default value is `pretrain/nsf_hifigan/model`.
+
+The 'config.json' of the vocoder needs to be at the same directory, for example, `pretrain/nsf_hifigan/config.json`.
 
 - Pitch extractor:
 
